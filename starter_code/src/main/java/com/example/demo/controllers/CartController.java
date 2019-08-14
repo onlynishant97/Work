@@ -13,85 +13,57 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.persistence.Cart;
 import com.example.demo.model.persistence.Item;
-import com.example.demo.model.persistence.EcommerceUser;
+import com.example.demo.model.persistence.User;
 import com.example.demo.model.persistence.repositories.CartRepository;
 import com.example.demo.model.persistence.repositories.ItemRepository;
 import com.example.demo.model.persistence.repositories.UserRepository;
 import com.example.demo.model.requests.ModifyCartRequest;
 
-/**
- * The Class CartController.
- */
 @RestController
 @RequestMapping("/api/cart")
 public class CartController {
-
-	/** The user repository. */
+	
 	@Autowired
 	private UserRepository userRepository;
-
-	/** The cart repository. */
+	
 	@Autowired
 	private CartRepository cartRepository;
-
-	/** The item repository. */
+	
 	@Autowired
 	private ItemRepository itemRepository;
-
-	/**
-	 * Adds the tocart.
-	 *
-	 * @param request the request
-	 * @return the response entity
-	 */
+	
 	@PostMapping("/addToCart")
 	public ResponseEntity<Cart> addTocart(@RequestBody ModifyCartRequest request) {
-
-		if (request.getItemId() <= 0 || request.getQuantity() <= 0 || request.getUsername() == null
-				|| request.getUsername().length() <= 0) {
-			return ResponseEntity.badRequest().build();
-		}
-
-		EcommerceUser user = userRepository.findByUsername(request.getUsername());
-		if (user == null) {
+		User user = userRepository.findByUsername(request.getUsername());
+		if(user == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Optional<Item> item = itemRepository.findById(request.getItemId());
-		if (!item.isPresent()) {
+		if(!item.isPresent()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Cart cart = user.getCart();
-		IntStream.range(0, request.getQuantity()).forEach(i -> cart.addItem(item.get()));
+		IntStream.range(0, request.getQuantity())
+			.forEach(i -> cart.addItem(item.get()));
 		cartRepository.save(cart);
 		return ResponseEntity.ok(cart);
 	}
-
-	/**
-	 * Removes the fromcart.
-	 *
-	 * @param request the request
-	 * @return the response entity
-	 */
+	
 	@PostMapping("/removeFromCart")
 	public ResponseEntity<Cart> removeFromcart(@RequestBody ModifyCartRequest request) {
-
-		if (request.getItemId() <= 0 || request.getQuantity() <= 0 || request.getUsername() == null
-				|| request.getUsername().length() <= 0) {
-			return ResponseEntity.badRequest().build();
-		}
-
-		EcommerceUser user = userRepository.findByUsername(request.getUsername());
-		if (user == null) {
+		User user = userRepository.findByUsername(request.getUsername());
+		if(user == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Optional<Item> item = itemRepository.findById(request.getItemId());
-		if (!item.isPresent()) {
+		if(!item.isPresent()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Cart cart = user.getCart();
-		IntStream.range(0, request.getQuantity()).forEach(i -> cart.removeItem(item.get()));
+		IntStream.range(0, request.getQuantity())
+			.forEach(i -> cart.removeItem(item.get()));
 		cartRepository.save(cart);
 		return ResponseEntity.ok(cart);
 	}
-
+		
 }
